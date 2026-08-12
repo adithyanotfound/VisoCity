@@ -11,6 +11,9 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.8.1)
+      '@types/node':
+        specifier: ^22.13.5
+        version: 22.20.1
       '@types/ws':
         specifier: ^8.18.1
         version: 8.18.1
@@ -148,6 +151,9 @@ importers:
       '@visoagent/protocol':
         specifier: workspace:*
         version: link:../protocol
+      '@visoagent/storage':
+        specifier: workspace:*
+        version: link:../storage
     devDependencies:
       typescript:
         specifier: ^5.8.2

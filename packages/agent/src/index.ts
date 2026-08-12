@@ -1,9 +1,9 @@
-// Agent package placeholder for Claude Agent SDK wrapper
-export interface AgentConfig {
-  apiKey?: string;
-  defaultModel?: 'opus' | 'sonnet' | 'haiku';
-}
-
-export function isAgentAvailable(): boolean {
-  return true;
-}
+export * from './types.js';
+export * from './runner/interface.js';
+export * from './runner/process-runner.js';
+export * from './runner/antigravity.js';
+export * from './runner/mock.js';
+export * from './permissions.js';
+export * from './prompts.js';
+export * from './session.js';
+export * from './manager.js';
