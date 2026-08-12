@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { buildServer, ServerOptions } from '../../apps/server/src/server.js';
+import { TaskService, InMemoryTaskRepository } from '@visoagent/storage';
 import type { AddressInfo } from 'node:net';
 
 export interface TestServerInstance {
@@ -13,6 +14,7 @@ export interface TestServerInstance {
 export async function createTestServer(options: ServerOptions = {}): Promise<TestServerInstance> {
   const server = await buildServer({
     logger: false,
+    taskService: options.taskService ?? new TaskService(new InMemoryTaskRepository()),
     ...options,
   });
 
