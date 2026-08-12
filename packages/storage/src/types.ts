@@ -7,13 +7,7 @@ import type {
 } from '@visoagent/protocol';
 
 export type SessionStatus =
-  | 'idle'
-  | 'initializing'
-  | 'running'
-  | 'waiting_for_permit'
-  | 'completed'
-  | 'failed'
-  | 'aborted';
+  'idle' | 'initializing' | 'running' | 'waiting_for_permit' | 'completed' | 'failed' | 'aborted';
 
 export interface SessionRecord {
   id: string;

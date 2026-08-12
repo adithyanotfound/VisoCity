@@ -2,14 +2,8 @@ import { DatabaseSync } from 'node:sqlite';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { StorageOptions } from '../types.js';
+import { getDatabaseDefaults } from '../db.js';
 import { initSchema } from './schema.js';
-
-export function getDatabaseDefaults(): Required<StorageOptions> {
-  return {
-    dbPath: '.visocity/world.db',
-    inMemory: false,
-  };
-}
 
 export function createDatabase(options: StorageOptions = {}): DatabaseSync {
   const isMemory = options.inMemory || options.dbPath === ':memory:';
