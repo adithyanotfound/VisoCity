@@ -20,8 +20,11 @@ export function createDatabase(options: StorageOptions = {}): DatabaseSync {
     db = new DatabaseSync(dbPath);
     // Set WAL mode for persistent files
     db.exec('PRAGMA journal_mode = WAL;');
-    db.exec('PRAGMA synchronous = NORMAL;');
   }
+
+  db.exec('PRAGMA busy_timeout = 10000;');
+  db.exec('PRAGMA synchronous = NORMAL;');
+  db.exec('PRAGMA foreign_keys = ON;');
 
   initSchema(db);
   return db;
