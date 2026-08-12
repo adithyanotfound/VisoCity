@@ -2,11 +2,7 @@ import Fastify, { FastifyInstance, FastifyServerOptions } from 'fastify';
 import cors from '@fastify/cors';
 import websocket from '@fastify/websocket';
 import path from 'node:path';
-import {
-  TaskService,
-  SqliteTaskRepository,
-  createDatabase,
-} from '@visoagent/storage';
+import { TaskService, SqliteTaskRepository, createDatabase } from '@visoagent/storage';
 import { AppConfig, config } from './config.js';
 import { healthRoutes } from './routes/health.js';
 import { tasksRoutes } from './routes/tasks.js';
@@ -53,8 +49,8 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
       new SqliteTaskRepository(
         createDatabase({
           dbPath: path.resolve(currentConfig.repoPath, '.visocity/world.db'),
-        })
-      )
+        }),
+      ),
     );
 
   server.decorate('taskService', taskService);

@@ -42,7 +42,7 @@ export class InvalidTaskStateTransitionError extends Error {
 
     super(
       `Invalid task state transition${taskQualifier}: cannot transition from "${currentStatus}" to "${targetLabel}". ` +
-      `Allowed transitions: [${allowedStr}]`
+        `Allowed transitions: [${allowedStr}]`,
     );
 
     this.name = 'InvalidTaskStateTransitionError';
@@ -82,7 +82,11 @@ export class TaskStateMachine {
   /**
    * Validates transition; throws InvalidTaskStateTransitionError if transition is invalid.
    */
-  static validateTransition(currentStatus: TaskStatus, targetStatus: TaskStatus, taskId?: string): void {
+  static validateTransition(
+    currentStatus: TaskStatus,
+    targetStatus: TaskStatus,
+    taskId?: string,
+  ): void {
     if (!this.canTransition(currentStatus, targetStatus)) {
       throw new InvalidTaskStateTransitionError(currentStatus, targetStatus, taskId);
     }

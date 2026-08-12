@@ -19,7 +19,7 @@ export interface TasksPluginOptions extends FastifyPluginOptions {
 
 export async function tasksRoutes(
   server: FastifyInstance,
-  options: Partial<TasksPluginOptions>
+  options: Partial<TasksPluginOptions>,
 ): Promise<void> {
   const taskService = options.taskService ?? server.taskService;
   if (!taskService) {
@@ -51,7 +51,7 @@ export async function tasksRoutes(
     if (err instanceof TaskValidationError || err instanceof z.ZodError) {
       return reply.status(400).send({
         error: 'ValidationError',
-        message: err instanceof z.ZodError ? err.errors[0]?.message ?? err.message : err.message,
+        message: err instanceof z.ZodError ? (err.errors[0]?.message ?? err.message) : err.message,
         details: err instanceof z.ZodError ? err.errors : undefined,
       });
     }
@@ -71,7 +71,7 @@ export async function tasksRoutes(
       request: FastifyRequest<{
         Querystring: Record<string, string | string[] | undefined>;
       }>,
-      reply: FastifyReply
+      reply: FastifyReply,
     ) => {
       try {
         const query = request.query;
@@ -82,8 +82,8 @@ export async function tasksRoutes(
           rawFilter.status = Array.isArray(query.status)
             ? query.status
             : (query.status as string).includes(',')
-            ? (query.status as string).split(',')
-            : query.status;
+              ? (query.status as string).split(',')
+              : query.status;
         }
         if (query.agentId) rawFilter.agentId = query.agentId;
         if (query.sessionId) rawFilter.sessionId = query.sessionId;
@@ -109,7 +109,7 @@ export async function tasksRoutes(
       } catch (err) {
         return handleError(err, reply);
       }
-    }
+    },
   );
 
   // POST /api/tasks - Create task
@@ -123,7 +123,7 @@ export async function tasksRoutes(
       } catch (err) {
         return handleError(err, reply);
       }
-    }
+    },
   );
 
   // GET /api/tasks/:id - Retrieve single task
@@ -136,7 +136,7 @@ export async function tasksRoutes(
       } catch (err) {
         return handleError(err, reply);
       }
-    }
+    },
   );
 
   // PATCH /api/tasks/:id - Update task details
@@ -144,7 +144,7 @@ export async function tasksRoutes(
     '/api/tasks/:id',
     async (
       request: FastifyRequest<{ Params: { id: string }; Body: unknown }>,
-      reply: FastifyReply
+      reply: FastifyReply,
     ) => {
       try {
         const input = UpdateTaskInputSchema.parse(request.body);
@@ -153,7 +153,7 @@ export async function tasksRoutes(
       } catch (err) {
         return handleError(err, reply);
       }
-    }
+    },
   );
 
   // DELETE /api/tasks/:id - Delete task
@@ -166,7 +166,7 @@ export async function tasksRoutes(
       } catch (err) {
         return handleError(err, reply);
       }
-    }
+    },
   );
 
   // POST /api/tasks/:id/transition - Explicit state transition
@@ -174,7 +174,7 @@ export async function tasksRoutes(
     '/api/tasks/:id/transition',
     async (
       request: FastifyRequest<{ Params: { id: string }; Body: unknown }>,
-      reply: FastifyReply
+      reply: FastifyReply,
     ) => {
       try {
         const input = TransitionTaskInputSchema.parse(request.body);
@@ -183,7 +183,7 @@ export async function tasksRoutes(
       } catch (err) {
         return handleError(err, reply);
       }
-    }
+    },
   );
 
   // POST /api/tasks/:id/assign - Assign task
@@ -194,7 +194,7 @@ export async function tasksRoutes(
         Params: { id: string };
         Body: { agent: unknown; reason?: string; actor?: string };
       }>,
-      reply: FastifyReply
+      reply: FastifyReply,
     ) => {
       try {
         const body = request.body || {};
@@ -207,7 +207,7 @@ export async function tasksRoutes(
       } catch (err) {
         return handleError(err, reply);
       }
-    }
+    },
   );
 
   // POST /api/tasks/:id/start - Start task
@@ -218,7 +218,7 @@ export async function tasksRoutes(
         Params: { id: string };
         Body: { reason?: string; actor?: string } | undefined;
       }>,
-      reply: FastifyReply
+      reply: FastifyReply,
     ) => {
       try {
         const body = request.body || {};
@@ -230,7 +230,7 @@ export async function tasksRoutes(
       } catch (err) {
         return handleError(err, reply);
       }
-    }
+    },
   );
 
   // POST /api/tasks/:id/submit-review - Submit for review
@@ -241,11 +241,13 @@ export async function tasksRoutes(
         Params: { id: string };
         Body: { pullRequest?: unknown; reason?: string; actor?: string } | undefined;
       }>,
-      reply: FastifyReply
+      reply: FastifyReply,
     ) => {
       try {
         const body = request.body || {};
-        const pullRequest = body.pullRequest ? TaskPullRequestSchema.parse(body.pullRequest) : undefined;
+        const pullRequest = body.pullRequest
+          ? TaskPullRequestSchema.parse(body.pullRequest)
+          : undefined;
         const task = await taskService.submitForReview(request.params.id, {
           pullRequest,
           reason: body.reason,
@@ -255,7 +257,7 @@ export async function tasksRoutes(
       } catch (err) {
         return handleError(err, reply);
       }
-    }
+    },
   );
 
   // POST /api/tasks/:id/approve - Approve task
@@ -266,7 +268,7 @@ export async function tasksRoutes(
         Params: { id: string };
         Body: { reason?: string; actor?: string } | undefined;
       }>,
-      reply: FastifyReply
+      reply: FastifyReply,
     ) => {
       try {
         const body = request.body || {};
@@ -278,7 +280,7 @@ export async function tasksRoutes(
       } catch (err) {
         return handleError(err, reply);
       }
-    }
+    },
   );
 
   // POST /api/tasks/:id/ready-to-merge - Ready to merge
@@ -289,7 +291,7 @@ export async function tasksRoutes(
         Params: { id: string };
         Body: { reason?: string; actor?: string } | undefined;
       }>,
-      reply: FastifyReply
+      reply: FastifyReply,
     ) => {
       try {
         const body = request.body || {};
@@ -301,7 +303,7 @@ export async function tasksRoutes(
       } catch (err) {
         return handleError(err, reply);
       }
-    }
+    },
   );
 
   // POST /api/tasks/:id/merge - Merged
@@ -312,7 +314,7 @@ export async function tasksRoutes(
         Params: { id: string };
         Body: { result?: unknown; reason?: string; actor?: string } | undefined;
       }>,
-      reply: FastifyReply
+      reply: FastifyReply,
     ) => {
       try {
         const body = request.body || {};
@@ -326,7 +328,7 @@ export async function tasksRoutes(
       } catch (err) {
         return handleError(err, reply);
       }
-    }
+    },
   );
 
   // POST /api/tasks/:id/fail - Fail task
@@ -337,14 +339,12 @@ export async function tasksRoutes(
         Params: { id: string };
         Body: { error: unknown; reason?: string; actor?: string };
       }>,
-      reply: FastifyReply
+      reply: FastifyReply,
     ) => {
       try {
         const body = request.body || { error: 'Unknown error' };
         const error =
-          typeof body.error === 'string'
-            ? body.error
-            : TaskErrorSchema.parse(body.error);
+          typeof body.error === 'string' ? body.error : TaskErrorSchema.parse(body.error);
         const task = await taskService.failTask(request.params.id, error, {
           reason: body.reason,
           actor: body.actor,
@@ -353,7 +353,7 @@ export async function tasksRoutes(
       } catch (err) {
         return handleError(err, reply);
       }
-    }
+    },
   );
 
   // POST /api/tasks/:id/retry - Retry failed task
@@ -364,7 +364,7 @@ export async function tasksRoutes(
         Params: { id: string };
         Body: { reason?: string; actor?: string } | undefined;
       }>,
-      reply: FastifyReply
+      reply: FastifyReply,
     ) => {
       try {
         const body = request.body || {};
@@ -376,6 +376,6 @@ export async function tasksRoutes(
       } catch (err) {
         return handleError(err, reply);
       }
-    }
+    },
   );
 }

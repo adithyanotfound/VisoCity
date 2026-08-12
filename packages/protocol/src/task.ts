@@ -32,7 +32,10 @@ export const TaskStatusSchema = z.enum(TASK_STATUSES);
  * Normalizes loose status string variants (e.g. 'in progress' -> 'in_progress')
  */
 export function normalizeTaskStatus(raw: string): TaskStatus {
-  const sanitized = raw.trim().toLowerCase().replace(/[\s-]+/g, '_');
+  const sanitized = raw
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, '_');
   const result = TaskStatusSchema.safeParse(sanitized);
   if (result.success) {
     return result.data;

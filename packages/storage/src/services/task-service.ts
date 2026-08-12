@@ -237,7 +237,7 @@ export class TaskService extends EventEmitter {
   async assignTask(
     id: string,
     agent: TaskAgent,
-    options: { reason?: string; actor?: string } = {}
+    options: { reason?: string; actor?: string } = {},
   ): Promise<Task> {
     return this.transitionTask(id, {
       status: 'assigned',
@@ -250,10 +250,7 @@ export class TaskService extends EventEmitter {
   /**
    * Starts task execution (assigned -> in_progress or queued -> in_progress).
    */
-  async startTask(
-    id: string,
-    options: { reason?: string; actor?: string } = {}
-  ): Promise<Task> {
+  async startTask(id: string, options: { reason?: string; actor?: string } = {}): Promise<Task> {
     return this.transitionTask(id, {
       status: 'in_progress',
       reason: options.reason ?? 'Execution started',
@@ -266,7 +263,7 @@ export class TaskService extends EventEmitter {
    */
   async submitForReview(
     id: string,
-    options: { pullRequest?: TaskPullRequest; reason?: string; actor?: string } = {}
+    options: { pullRequest?: TaskPullRequest; reason?: string; actor?: string } = {},
   ): Promise<Task> {
     return this.transitionTask(id, {
       status: 'awaiting_review',
@@ -279,10 +276,7 @@ export class TaskService extends EventEmitter {
   /**
    * Approves task after review (awaiting_review -> approved).
    */
-  async approveTask(
-    id: string,
-    options: { reason?: string; actor?: string } = {}
-  ): Promise<Task> {
+  async approveTask(id: string, options: { reason?: string; actor?: string } = {}): Promise<Task> {
     return this.transitionTask(id, {
       status: 'approved',
       reason: options.reason ?? 'Task approved',
@@ -295,7 +289,7 @@ export class TaskService extends EventEmitter {
    */
   async markReadyToMerge(
     id: string,
-    options: { reason?: string; actor?: string } = {}
+    options: { reason?: string; actor?: string } = {},
   ): Promise<Task> {
     return this.transitionTask(id, {
       status: 'ready_to_merge',
@@ -309,7 +303,7 @@ export class TaskService extends EventEmitter {
    */
   async markMerged(
     id: string,
-    options: { result?: TaskResult; reason?: string; actor?: string } = {}
+    options: { result?: TaskResult; reason?: string; actor?: string } = {},
   ): Promise<Task> {
     return this.transitionTask(id, {
       status: 'merged',
@@ -325,7 +319,7 @@ export class TaskService extends EventEmitter {
   async failTask(
     id: string,
     error: TaskError | string,
-    options: { reason?: string; actor?: string } = {}
+    options: { reason?: string; actor?: string } = {},
   ): Promise<Task> {
     const errorObj: TaskError = typeof error === 'string' ? { message: error } : error;
     return this.transitionTask(id, {
@@ -339,10 +333,7 @@ export class TaskService extends EventEmitter {
   /**
    * Retries a failed task, returning it to queued state.
    */
-  async retryTask(
-    id: string,
-    options: { reason?: string; actor?: string } = {}
-  ): Promise<Task> {
+  async retryTask(id: string, options: { reason?: string; actor?: string } = {}): Promise<Task> {
     return this.transitionTask(id, {
       status: 'queued',
       reason: options.reason ?? 'Task retried',

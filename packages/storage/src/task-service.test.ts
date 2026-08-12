@@ -1,7 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-  InvalidTaskStateTransitionError,
-} from '@visoagent/protocol';
+import { InvalidTaskStateTransitionError } from '@visoagent/protocol';
 import { InMemoryTaskRepository } from './repositories/in-memory-task-repository.js';
 import { SqliteTaskRepository } from './repositories/sqlite-task-repository.js';
 import { createDatabase } from './sqlite/db.js';
@@ -59,7 +57,7 @@ describe('TaskService Lifecycle & State Machine', () => {
             role: 'architect',
             model: 'claude-3-7-sonnet',
           },
-          { reason: 'Assigned to senior architect' }
+          { reason: 'Assigned to senior architect' },
         );
 
         expect(assigned.status).toBe('assigned');
@@ -140,7 +138,9 @@ describe('TaskService Lifecycle & State Machine', () => {
         expect(reworked.status).toBe('in_progress');
 
         // Resubmit for review
-        const resubmitted = await service.submitForReview(task.id, { reason: 'Fixed shadow depths' });
+        const resubmitted = await service.submitForReview(task.id, {
+          reason: 'Fixed shadow depths',
+        });
         expect(resubmitted.status).toBe('awaiting_review');
 
         // Approve
@@ -195,13 +195,11 @@ describe('TaskService Lifecycle & State Machine', () => {
 
         // queued -> merged is invalid
         await expect(service.transitionTask(task.id, 'merged')).rejects.toThrow(
-          InvalidTaskStateTransitionError
+          InvalidTaskStateTransitionError,
         );
 
         // queued -> approved is invalid
-        await expect(service.approveTask(task.id)).rejects.toThrow(
-          InvalidTaskStateTransitionError
-        );
+        await expect(service.approveTask(task.id)).rejects.toThrow(InvalidTaskStateTransitionError);
 
         // Task status should remain queued
         const current = await service.getTaskOrThrow(task.id);
@@ -217,29 +215,19 @@ describe('TaskService Lifecycle & State Machine', () => {
         await service.markMerged(task.id);
 
         // Cannot move from merged to in_progress
-        await expect(service.startTask(task.id)).rejects.toThrow(
-          InvalidTaskStateTransitionError
-        );
+        await expect(service.startTask(task.id)).rejects.toThrow(InvalidTaskStateTransitionError);
 
         // Cannot move from merged to queued
-        await expect(service.retryTask(task.id)).rejects.toThrow(
-          InvalidTaskStateTransitionError
-        );
+        await expect(service.retryTask(task.id)).rejects.toThrow(InvalidTaskStateTransitionError);
       });
 
       it('throws TaskNotFoundError when operating on non-existent task', async () => {
-        await expect(service.getTaskOrThrow('non-existent')).rejects.toThrow(
-          TaskNotFoundError
-        );
+        await expect(service.getTaskOrThrow('non-existent')).rejects.toThrow(TaskNotFoundError);
         await expect(service.updateTask('non-existent', { title: 'New' })).rejects.toThrow(
-          TaskNotFoundError
+          TaskNotFoundError,
         );
-        await expect(service.startTask('non-existent')).rejects.toThrow(
-          TaskNotFoundError
-        );
-        await expect(service.deleteTask('non-existent')).rejects.toThrow(
-          TaskNotFoundError
-        );
+        await expect(service.startTask('non-existent')).rejects.toThrow(TaskNotFoundError);
+        await expect(service.deleteTask('non-existent')).rejects.toThrow(TaskNotFoundError);
       });
 
       it('updates mutable task fields and emits task:updated', async () => {

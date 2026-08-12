@@ -1,10 +1,5 @@
 import type { DatabaseSync } from 'node:sqlite';
-import {
-  Task,
-  TaskFilter,
-  TaskTransitionHistoryEntry,
-  TaskSchema,
-} from '@visoagent/protocol';
+import { Task, TaskFilter, TaskTransitionHistoryEntry, TaskSchema } from '@visoagent/protocol';
 import { ITaskRepository } from '../types.js';
 
 interface TaskDbRow {
@@ -101,7 +96,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       task.error ? JSON.stringify(task.error) : null,
       task.result ? JSON.stringify(task.result) : null,
       task.metadata ? JSON.stringify(task.metadata) : JSON.stringify({}),
-      JSON.stringify(task)
+      JSON.stringify(task),
     );
 
     if (task.history && task.history.length > 0) {
@@ -120,7 +115,7 @@ export class SqliteTaskRepository implements ITaskRepository {
           entry.timestamp,
           entry.reason ?? null,
           entry.actor ?? null,
-          entry.metadata ? JSON.stringify(entry.metadata) : null
+          entry.metadata ? JSON.stringify(entry.metadata) : null,
         );
       }
     }
@@ -200,7 +195,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       task.result ? JSON.stringify(task.result) : null,
       task.metadata ? JSON.stringify(task.metadata) : JSON.stringify({}),
       JSON.stringify(task),
-      task.id
+      task.id,
     );
 
     if (task.history && task.history.length > 0) {
@@ -219,7 +214,7 @@ export class SqliteTaskRepository implements ITaskRepository {
           entry.timestamp,
           entry.reason ?? null,
           entry.actor ?? null,
-          entry.metadata ? JSON.stringify(entry.metadata) : null
+          entry.metadata ? JSON.stringify(entry.metadata) : null,
         );
       }
     }
@@ -269,7 +264,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       entry.timestamp,
       entry.reason ?? null,
       entry.actor ?? null,
-      entry.metadata ? JSON.stringify(entry.metadata) : null
+      entry.metadata ? JSON.stringify(entry.metadata) : null,
     );
   }
 
@@ -349,7 +344,7 @@ export class SqliteTaskRepository implements ITaskRepository {
 
   private buildFilterQuery(
     filter: TaskFilter,
-    isCount: boolean
+    isCount: boolean,
   ): { queryStr: string; params: (string | number)[] } {
     const conditions: string[] = [];
     const params: (string | number)[] = [];

@@ -1,8 +1,4 @@
-import type {
-  Task,
-  TaskFilter,
-  TaskTransitionHistoryEntry,
-} from '@visoagent/protocol';
+import type { Task, TaskFilter, TaskTransitionHistoryEntry } from '@visoagent/protocol';
 import { ITaskRepository } from '../types.js';
 
 export class InMemoryTaskRepository implements ITaskRepository {

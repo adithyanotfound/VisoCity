@@ -14,8 +14,12 @@ describe('TaskStateMachine', () => {
       expect(TaskStateMachine.canTransition('queued', 'in_progress')).toBe(true);
       expect(TaskStateMachine.canTransition('queued', 'failed')).toBe(true);
 
-      expect(() => TaskStateMachine.validateTransition('queued', 'assigned', 'task-1')).not.toThrow();
-      expect(() => TaskStateMachine.validateTransition('queued', 'in_progress', 'task-1')).not.toThrow();
+      expect(() =>
+        TaskStateMachine.validateTransition('queued', 'assigned', 'task-1'),
+      ).not.toThrow();
+      expect(() =>
+        TaskStateMachine.validateTransition('queued', 'in_progress', 'task-1'),
+      ).not.toThrow();
       expect(() => TaskStateMachine.validateTransition('queued', 'failed', 'task-1')).not.toThrow();
     });
 
@@ -24,9 +28,15 @@ describe('TaskStateMachine', () => {
       expect(TaskStateMachine.canTransition('assigned', 'queued')).toBe(true);
       expect(TaskStateMachine.canTransition('assigned', 'failed')).toBe(true);
 
-      expect(() => TaskStateMachine.validateTransition('assigned', 'in_progress', 'task-2')).not.toThrow();
-      expect(() => TaskStateMachine.validateTransition('assigned', 'queued', 'task-2')).not.toThrow();
-      expect(() => TaskStateMachine.validateTransition('assigned', 'failed', 'task-2')).not.toThrow();
+      expect(() =>
+        TaskStateMachine.validateTransition('assigned', 'in_progress', 'task-2'),
+      ).not.toThrow();
+      expect(() =>
+        TaskStateMachine.validateTransition('assigned', 'queued', 'task-2'),
+      ).not.toThrow();
+      expect(() =>
+        TaskStateMachine.validateTransition('assigned', 'failed', 'task-2'),
+      ).not.toThrow();
     });
 
     it('allows valid transitions from "in_progress"', () => {
@@ -35,7 +45,9 @@ describe('TaskStateMachine', () => {
       expect(TaskStateMachine.canTransition('in_progress', 'queued')).toBe(true);
       expect(TaskStateMachine.canTransition('in_progress', 'assigned')).toBe(true);
 
-      expect(() => TaskStateMachine.validateTransition('in_progress', 'awaiting_review')).not.toThrow();
+      expect(() =>
+        TaskStateMachine.validateTransition('in_progress', 'awaiting_review'),
+      ).not.toThrow();
       expect(() => TaskStateMachine.validateTransition('in_progress', 'failed')).not.toThrow();
       expect(() => TaskStateMachine.validateTransition('in_progress', 'queued')).not.toThrow();
       expect(() => TaskStateMachine.validateTransition('in_progress', 'assigned')).not.toThrow();
@@ -46,8 +58,12 @@ describe('TaskStateMachine', () => {
       expect(TaskStateMachine.canTransition('awaiting_review', 'in_progress')).toBe(true);
       expect(TaskStateMachine.canTransition('awaiting_review', 'failed')).toBe(true);
 
-      expect(() => TaskStateMachine.validateTransition('awaiting_review', 'approved')).not.toThrow();
-      expect(() => TaskStateMachine.validateTransition('awaiting_review', 'in_progress')).not.toThrow();
+      expect(() =>
+        TaskStateMachine.validateTransition('awaiting_review', 'approved'),
+      ).not.toThrow();
+      expect(() =>
+        TaskStateMachine.validateTransition('awaiting_review', 'in_progress'),
+      ).not.toThrow();
       expect(() => TaskStateMachine.validateTransition('awaiting_review', 'failed')).not.toThrow();
     });
 
@@ -67,33 +83,47 @@ describe('TaskStateMachine', () => {
       expect(TaskStateMachine.canTransition('ready_to_merge', 'failed')).toBe(true);
 
       expect(() => TaskStateMachine.validateTransition('ready_to_merge', 'merged')).not.toThrow();
-      expect(() => TaskStateMachine.validateTransition('ready_to_merge', 'in_progress')).not.toThrow();
+      expect(() =>
+        TaskStateMachine.validateTransition('ready_to_merge', 'in_progress'),
+      ).not.toThrow();
       expect(() => TaskStateMachine.validateTransition('ready_to_merge', 'failed')).not.toThrow();
     });
 
     it('allows retrying a "failed" task back to "queued"', () => {
       expect(TaskStateMachine.canTransition('failed', 'queued')).toBe(true);
-      expect(() => TaskStateMachine.validateTransition('failed', 'queued', 'task-failed')).not.toThrow();
+      expect(() =>
+        TaskStateMachine.validateTransition('failed', 'queued', 'task-failed'),
+      ).not.toThrow();
     });
   });
 
   describe('Invalid State Transitions & Validation', () => {
     it('disallows jumping from "queued" directly to "approved", "ready_to_merge", or "merged"', () => {
-      const invalidFromQueued: TaskStatus[] = ['awaiting_review', 'approved', 'ready_to_merge', 'merged'];
+      const invalidFromQueued: TaskStatus[] = [
+        'awaiting_review',
+        'approved',
+        'ready_to_merge',
+        'merged',
+      ];
       for (const target of invalidFromQueued) {
         expect(TaskStateMachine.canTransition('queued', target)).toBe(false);
         expect(() => TaskStateMachine.validateTransition('queued', target, 'task-q')).toThrow(
-          InvalidTaskStateTransitionError
+          InvalidTaskStateTransitionError,
         );
       }
     });
 
     it('disallows jumping from "assigned" directly to review/merge/merged states', () => {
-      const invalidFromAssigned: TaskStatus[] = ['awaiting_review', 'approved', 'ready_to_merge', 'merged'];
+      const invalidFromAssigned: TaskStatus[] = [
+        'awaiting_review',
+        'approved',
+        'ready_to_merge',
+        'merged',
+      ];
       for (const target of invalidFromAssigned) {
         expect(TaskStateMachine.canTransition('assigned', target)).toBe(false);
         expect(() => TaskStateMachine.validateTransition('assigned', target)).toThrow(
-          InvalidTaskStateTransitionError
+          InvalidTaskStateTransitionError,
         );
       }
     });
@@ -103,7 +133,7 @@ describe('TaskStateMachine', () => {
       for (const target of invalidFromInProgress) {
         expect(TaskStateMachine.canTransition('in_progress', target)).toBe(false);
         expect(() => TaskStateMachine.validateTransition('in_progress', target)).toThrow(
-          InvalidTaskStateTransitionError
+          InvalidTaskStateTransitionError,
         );
       }
     });
@@ -113,7 +143,7 @@ describe('TaskStateMachine', () => {
       for (const target of invalidFromReview) {
         expect(TaskStateMachine.canTransition('awaiting_review', target)).toBe(false);
         expect(() => TaskStateMachine.validateTransition('awaiting_review', target)).toThrow(
-          InvalidTaskStateTransitionError
+          InvalidTaskStateTransitionError,
         );
       }
     });
@@ -123,7 +153,7 @@ describe('TaskStateMachine', () => {
       for (const target of invalidFromApproved) {
         expect(TaskStateMachine.canTransition('approved', target)).toBe(false);
         expect(() => TaskStateMachine.validateTransition('approved', target)).toThrow(
-          InvalidTaskStateTransitionError
+          InvalidTaskStateTransitionError,
         );
       }
     });
@@ -131,9 +161,9 @@ describe('TaskStateMachine', () => {
     it('disallows transitioning out of "merged" (terminal state)', () => {
       for (const target of TASK_STATUSES) {
         expect(TaskStateMachine.canTransition('merged', target)).toBe(false);
-        expect(() => TaskStateMachine.validateTransition('merged', target, 'task-merged-1')).toThrow(
-          InvalidTaskStateTransitionError
-        );
+        expect(() =>
+          TaskStateMachine.validateTransition('merged', target, 'task-merged-1'),
+        ).toThrow(InvalidTaskStateTransitionError);
       }
     });
 
@@ -142,7 +172,7 @@ describe('TaskStateMachine', () => {
       for (const target of nonRetryStatuses) {
         expect(TaskStateMachine.canTransition('failed', target)).toBe(false);
         expect(() => TaskStateMachine.validateTransition('failed', target)).toThrow(
-          InvalidTaskStateTransitionError
+          InvalidTaskStateTransitionError,
         );
       }
     });
@@ -151,7 +181,7 @@ describe('TaskStateMachine', () => {
       for (const status of TASK_STATUSES) {
         expect(TaskStateMachine.canTransition(status, status)).toBe(false);
         expect(() => TaskStateMachine.validateTransition(status, status, 'task-self')).toThrow(
-          InvalidTaskStateTransitionError
+          InvalidTaskStateTransitionError,
         );
       }
     });
@@ -204,7 +234,9 @@ describe('TaskStateMachine', () => {
 
     it('returns exact allowed transitions matching TASK_STATUS_TRANSITIONS table', () => {
       for (const status of TASK_STATUSES) {
-        expect(TaskStateMachine.getAllowedTransitions(status)).toEqual(TASK_STATUS_TRANSITIONS[status]);
+        expect(TaskStateMachine.getAllowedTransitions(status)).toEqual(
+          TASK_STATUS_TRANSITIONS[status],
+        );
       }
     });
 
