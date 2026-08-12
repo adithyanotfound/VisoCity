@@ -1,10 +1,4 @@
-// Storage package placeholder for SQLite persistence
-export interface StorageOptions {
-  dbPath: string;
-}
-
-export function getDatabaseDefaults(): StorageOptions {
-  return {
-    dbPath: '.visocity/world.db',
-  };
-}
+export * from './types.js';
+export * from './schema.js';
+export * from './db.js';
+export * from './repository.js';

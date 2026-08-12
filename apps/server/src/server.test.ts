@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildServer } from './server.js';
-import { HealthResponseSchema } from '@visoagent/protocol';
+import { HealthResponseSchema, type ServerMessage } from '@visoagent/protocol';
 
 describe('Server Scaffold & Health Endpoint', () => {
   let server: FastifyInstance;
@@ -43,5 +43,36 @@ describe('Server Scaffold & Health Endpoint', () => {
     });
 
     expect(response.statusCode).toBe(404);
+  });
+
+  it('handles WebSocket connections and receives initial roster', async () => {
+    const address = await server.listen({ port: 0, host: '127.0.0.1' });
+    const wsUrl = address.replace('http://', 'ws://') + '/ws';
+    const { WebSocket } = await import('ws');
+
+    const ws = new WebSocket(wsUrl);
+
+    const receivedMessages: ServerMessage[] = [];
+    await new Promise<void>((resolve, reject) => {
+      ws.on('open', () => {
+        // Connected
+      });
+      ws.on('message', (data) => {
+        const msg = JSON.parse(data.toString('utf-8')) as ServerMessage;
+        receivedMessages.push(msg);
+        if (msg.type === 'cities.roster') {
+          ws.close();
+          resolve();
+        }
+      });
+      ws.on('error', reject);
+    });
+
+    expect(receivedMessages.length).toBeGreaterThan(0);
+    const firstMsg = receivedMessages[0];
+    expect(firstMsg?.type).toBe('cities.roster');
+    if (firstMsg?.type === 'cities.roster') {
+      expect(firstMsg.cities[0]?.cityId).toBe('main');
+    }
   });
 });

@@ -19,7 +19,8 @@
     "clean": "rm -rf dist tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@visoagent/protocol": "workspace:*"
+    "@visoagent/protocol": "workspace:*",
+    "@visoagent/storage": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.8.2"
