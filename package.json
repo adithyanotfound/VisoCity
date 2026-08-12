@@ -18,7 +18,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "pnpm --filter \"@visoagent/*\" run typecheck",
+    "typecheck": "pnpm --filter \"./packages/*\" run build && pnpm --filter \"@visoagent/*\" run typecheck",
     "validate": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test:coverage && pnpm run build",
     "ci": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test:coverage && pnpm run build",
     "clean": "pnpm --filter \"@visoagent/*\" run clean"
