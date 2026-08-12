@@ -1,0 +1,21 @@
+{
+  "name": "visoagent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.12.4",
+  "scripts": {
+    "dev": "pnpm --filter \"@visoagent/*\" --parallel run dev",
+    "dev:server": "pnpm --filter @visoagent/server dev",
+    "dev:web": "pnpm --filter @visoagent/web dev",
+    "build": "pnpm --filter \"./packages/*\" run build && pnpm --filter \"./apps/*\" run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "pnpm --filter \"@visoagent/*\" run typecheck",
+    "clean": "pnpm --filter \"@visoagent/*\" run clean"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.7"
+  }
+}
