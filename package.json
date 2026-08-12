@@ -10,12 +10,29 @@
     "dev:web": "pnpm --filter @visoagent/web dev",
     "build": "pnpm --filter \"./packages/*\" run build && pnpm --filter \"./apps/*\" run build",
     "test": "vitest run",
+    "test:unit": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "pnpm --filter \"@visoagent/*\" run typecheck",
+    "validate": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test:coverage && pnpm run build",
+    "ci": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test:coverage && pnpm run build",
     "clean": "pnpm --filter \"@visoagent/*\" run clean"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/ws": "^8.18.1",
+    "@vitest/coverage-v8": "^3.2.7",
+    "eslint": "^10.8.1",
+    "globals": "^17.11.0",
+    "prettier": "^3.9.6",
     "typescript": "^5.8.2",
-    "vitest": "^3.0.7"
+    "typescript-eslint": "^8.67.0",
+    "vitest": "^3.0.7",
+    "ws": "^8.21.3"
   }
 }
