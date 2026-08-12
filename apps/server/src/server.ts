@@ -14,9 +14,7 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
   const server = Fastify({
     logger: options.logger ?? {
       level: currentConfig.isProduction ? 'info' : 'debug',
-      transport: !currentConfig.isProduction
-        ? undefined
-        : undefined,
+      transport: !currentConfig.isProduction ? undefined : undefined,
     },
     ...options,
   });

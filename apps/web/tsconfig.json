@@ -15,7 +15,10 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@visoagent/*": ["../../packages/*/src/index.ts"]
+    }
   },
   "include": ["src"]
 }

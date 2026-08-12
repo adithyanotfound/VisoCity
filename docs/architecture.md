@@ -5,6 +5,7 @@ This document defines the complete architecture for our independent implementati
 ---
 
 ## Table of Contents
+
 1. [Executive Summary & Core Metaphor](#1-executive-summary--core-metaphor)
 2. [Hackathon Scope & Minimum Viable Demo Workflow](#2-hackathon-scope--minimum-viable-demo-workflow)
 3. [System Architecture & Monorepo Topology](#3-system-architecture--monorepo-topology)
@@ -24,6 +25,7 @@ This document defines the complete architecture for our independent implementati
 ## 1. Executive Summary & Core Metaphor
 
 ### 1.1. Core Concept
+
 Our implementation transforms any Git software repository into an interactive, 2.5D isometric pixel-art city. The developer assumes the role of the **Mayor**, overseeing autonomous AI coding agents operating as visible **Construction Crews**.
 
 ```
@@ -48,6 +50,7 @@ Our implementation transforms any Git software repository into an interactive, 2
 ```
 
 ### 1.2. Design Principles for Hackathon Implementation
+
 1. **Zero-Friction Local Bootstrapping**: Default to running against the local repository directory or any target path via `SUDO_CITY_REPO` without requiring PostgreSQL or complex external cloud infrastructure.
 2. **Pure, Deterministic Pipeline**: World scanning and spatial treemap layouts are deterministic, pure functions ($O(N)$ time complexity) allowing instant recalculation and reliable caching in SQLite.
 3. **Strict Protocol Contracts**: Frontend and backend communicate exclusively through typed Zod-validated WebSocket messages and JSON REST endpoints.
@@ -60,16 +63,16 @@ Our implementation transforms any Git software repository into an interactive, 2
 
 ### 2.1. Feature Matrix (Hackathon Demo vs. Post-Hackathon)
 
-| Feature Component | In-Scope for Hackathon Demo | Post-Hackathon Extension |
-|---|---|---|
-| **World Generation** | Single-pass file scan, language detection, squarified treemap layout, basic dependency links for roads | Full AST graph parsing for circular dependency detection across multiple languages |
-| **City Canvas** | Phaser 3 isometric tile grid, dynamic camera pan/zoom/focus, building hover/click, animated construction cranes | Ambient procedural day/night cycles, dynamic weather particles, vehicular traffic pathfinding |
-| **Mayor HUD** | Collapsible Console, Specialist selector (Architect, Worker, Runner), Order Dispatch with Drag & Drop file attachment, Building Inspector | Multi-monitor detachable floating windows, customizable themes |
-| **Agent Engine** | Anthropic Claude Agent SDK integration, hook streaming (`PreToolUse`, `PostToolUse`, `FileChanged`), permission gating (`canUseTool`), spend tracking | Multi-agent parallel swarm consensus, external tool plugins (LSP, debugger) |
-| **Worktree Engine** | Lazy worktree checkout for PRs and Issues, detached HEAD isolation, automatic branch cleanup | Remote worktree virtualization via Docker/Firecracker containers |
-| **GitHub Integration**| Personal Access Token fallback (`GITHUB_TOKEN`) and GitHub CLI (`gh`) integration; basic GitHub App OAuth | Enterprise GitHub Server SSO, webhook receiver daemon |
-| **PR & Code Review** | Visual diff overlays (new, modified, deleted buildings), read-only review agent execution, interactive Stamp/Deny approval, review submission | Inline file comment threads, automated merge conflict resolver |
-| **Persistence** | Embedded SQLite (`.visocity/world.db`) with WAL mode for snapshots, layout cache, and event history | Multi-tenant PostgreSQL cluster with distributed session replication |
+| Feature Component      | In-Scope for Hackathon Demo                                                                                                                           | Post-Hackathon Extension                                                                      |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **World Generation**   | Single-pass file scan, language detection, squarified treemap layout, basic dependency links for roads                                                | Full AST graph parsing for circular dependency detection across multiple languages            |
+| **City Canvas**        | Phaser 3 isometric tile grid, dynamic camera pan/zoom/focus, building hover/click, animated construction cranes                                       | Ambient procedural day/night cycles, dynamic weather particles, vehicular traffic pathfinding |
+| **Mayor HUD**          | Collapsible Console, Specialist selector (Architect, Worker, Runner), Order Dispatch with Drag & Drop file attachment, Building Inspector             | Multi-monitor detachable floating windows, customizable themes                                |
+| **Agent Engine**       | Anthropic Claude Agent SDK integration, hook streaming (`PreToolUse`, `PostToolUse`, `FileChanged`), permission gating (`canUseTool`), spend tracking | Multi-agent parallel swarm consensus, external tool plugins (LSP, debugger)                   |
+| **Worktree Engine**    | Lazy worktree checkout for PRs and Issues, detached HEAD isolation, automatic branch cleanup                                                          | Remote worktree virtualization via Docker/Firecracker containers                              |
+| **GitHub Integration** | Personal Access Token fallback (`GITHUB_TOKEN`) and GitHub CLI (`gh`) integration; basic GitHub App OAuth                                             | Enterprise GitHub Server SSO, webhook receiver daemon                                         |
+| **PR & Code Review**   | Visual diff overlays (new, modified, deleted buildings), read-only review agent execution, interactive Stamp/Deny approval, review submission         | Inline file comment threads, automated merge conflict resolver                                |
+| **Persistence**        | Embedded SQLite (`.visocity/world.db`) with WAL mode for snapshots, layout cache, and event history                                                   | Multi-tenant PostgreSQL cluster with distributed session replication                          |
 
 ### 2.2. Minimum Viable Demo Workflow (The 3-Minute Golden Path)
 
@@ -140,6 +143,7 @@ sequenceDiagram
 ## 3. System Architecture & Monorepo Topology
 
 ### 3.1. Monorepo Package Layout
+
 We structure the repository as a clean `pnpm` monorepo with strict package boundary separation:
 
 ```
@@ -289,6 +293,7 @@ flowchart LR
 ```
 
 ### 4.2. Boundary Invariants
+
 1. **No Direct Filesystem Access from Frontend**: The client never makes assumptions about file paths; all file contents, diffs, and geometries are delivered as serialized protocol structures.
 2. **Deterministic Layout Math on Backend**: To maintain identical coordinate systems across multiple clients and server sessions, geometry layout is strictly computed by `packages/layout` on the server.
 3. **Optimistic HUD vs. Authoritative Server Events**: The frontend displays immediate local UI feedback (e.g. typing in prompt, opening dialogs), but agent status, crane positions, spend numbers, and construction sites are strictly driven by authoritative `ServerMessage` broadcasts.
@@ -304,27 +309,27 @@ stateDiagram-v2
     [*] --> Idle: Server Ready
 
     Idle --> Initializing: Mayor Dispatches Order (`session.prompt`)
-    
+
     Initializing --> PromptAssembly: Sanitize Context Paths & Append Guidance
     PromptAssembly --> Running: Launch Claude Agent SDK Query
-    
+
     state Running {
         [*] --> Thinking: Model Generates Response
         Thinking --> StreamingText: Assistant Chunk Emitted
         Thinking --> ToolInterception: Agent Invokes Tool
-        
+
         state ToolInterception {
             [*] --> CheckPermission
             CheckPermission --> SafeTool: Read / Glob / Grep
             CheckPermission --> GatedTool: Write / Edit / Bash
-            
+
             SafeTool --> ExecutingTool: Auto-allowed
-            
+
             GatedTool --> WaitingForPermit: Emit `permit.requested`
             WaitingForPermit --> ExecutingTool: Permit Resolved (Allow)
             WaitingForPermit --> ToolRejected: Permit Resolved (Deny)
         }
-        
+
         ExecutingTool --> EmittingEvents: Emit `tool.completed` & `file.changed`
         EmittingEvents --> Thinking: Continue Query Loop
         ToolRejected --> Thinking: Return Rejection Message to Model
@@ -340,19 +345,21 @@ stateDiagram-v2
 ```
 
 ### 5.2. Crew Specialists & System Prompts
+
 The Mayor selects from three specialized agent personas:
 
 1. **The Architect (Claude Opus / High Effort)**:
-   - *Target*: Large-scale architectural refactors, cross-cutting feature additions, multi-file redesigns.
-   - *System Prompt Focus*: Comprehensive code analysis, dependency tree awareness, backward compatibility.
+   - _Target_: Large-scale architectural refactors, cross-cutting feature additions, multi-file redesigns.
+   - _System Prompt Focus_: Comprehensive code analysis, dependency tree awareness, backward compatibility.
 2. **The Worker (Claude Sonnet / Medium-High Effort)**:
-   - *Target*: General-purpose feature construction, bug fixes, unit tests, and routine modifications.
-   - *System Prompt Focus*: Direct, high-precision code edits, adhering strictly to existing code idioms.
+   - _Target_: General-purpose feature construction, bug fixes, unit tests, and routine modifications.
+   - _System Prompt Focus_: Direct, high-precision code edits, adhering strictly to existing code idioms.
 3. **The Runner (Claude Haiku / Low Effort)**:
-   - *Target*: Quick renames, single-line bug fixes, formatting corrections, documentation tweaks.
-   - *System Prompt Focus*: Minimal latency, concise changes, zero extraneous tool calls.
+   - _Target_: Quick renames, single-line bug fixes, formatting corrections, documentation tweaks.
+   - _System Prompt Focus_: Minimal latency, concise changes, zero extraneous tool calls.
 
 ### 5.3. Permission Gating & Permit Resolution
+
 - When an agent invokes a gated tool (`Write`, `Edit`, `Bash`):
   1. The SDK query execution halts on an unresolved JavaScript Promise inside `canUseTool`.
   2. The server generates a unique `permitId` and broadcasts `permit.requested` containing tool name, target file path, and proposed parameters.
@@ -364,7 +371,9 @@ The Mayor selects from three specialized agent personas:
 ## 6. Task Lifecycle
 
 ### 6.1. Task Classification
+
 Tasks represent unit goals executed within a city session:
+
 - **Mayor Orders**: Interactive coding prompts dispatched from the HUD.
 - **PR Code Reviews**: Automated static diff inspection and verdict publishing.
 - **Background Scans**: Repository rescanning triggered after agent file edits.
@@ -399,6 +408,7 @@ flowchart TD
 ## 7. Worktree Lifecycle
 
 ### 7.1. Worktree Directory Topology
+
 All isolated worktrees are stored inside a hidden directory within the target repository (`.visocity/worktrees/`):
 
 ```
@@ -426,7 +436,7 @@ sequenceDiagram
 
     Mayor->>Server: Request Travel (`city.travel` -> `pr-42`)
     Server->>Git: checkWorktreeExists(".visocity/worktrees/pr-42")
-    
+
     alt Worktree Does Not Exist (Lazy Creation)
         Server->>Git: Fetch PR Head Ref (`git fetch origin pull/42/head:refs/visocity/pr-42`)
         Server->>FS: Ensure Directory `.visocity/worktrees/pr-42`
@@ -457,6 +467,7 @@ sequenceDiagram
 ## 8. GitHub Integration
 
 ### 8.1. Dual GitHub Client Architecture
+
 To maximize development velocity and support both offline demo setups and live cloud testing, `packages/git` implements a unified `GitHubClient` interface with two drivers:
 
 ```mermaid
@@ -494,6 +505,7 @@ classDiagram
 ```
 
 ### 8.2. Authentication Modes
+
 1. **Demo / Local Fallback**: When `GITHUB_CLIENT_ID` is not configured, the backend uses `GhCliClient` (delegating to the local `gh` CLI session) or reads `process.env.GITHUB_TOKEN`.
 2. **GitHub App OAuth Flow**:
    - `GET /auth/github/start`: Generates signed CSRF state and redirects to `https://github.com/login/oauth/authorize`.
@@ -504,27 +516,30 @@ classDiagram
 ## 9. Pull Request Lifecycle
 
 ### 9.1. PR Roster State Progression
+
 Every detected PR in the upstream repository is tracked through explicit lifecycle states:
 
 ```mermaid
 stateDiagram-v2
     [*] --> Idle: PR Discovered on GitHub (state: open)
-    
+
     Idle --> Building: Mayor Initiates Travel to PR City
     Building --> Ready: Worktree Created, Scanned & Treemap Computed
     Building --> Failed: Git Fetch Error or Scan Timeout
-    
+
     Ready --> Reviewing: Mayor Dispatches Review Agent
     Reviewing --> Reviewed: Review Verdict Posted to GitHub
     Reviewed --> Ready: PR City Remains Navigable
-    
+
     Failed --> Building: Mayor Clicks "Retry City Scan"
     Ready --> Stale: PR Merged / Closed Upstream
     Stale --> [*]: Worktree Pruned & Removed
 ```
 
 ### 9.2. Diff Overlay Computation
+
 When generating the spatial map for a PR city, the backend computes the diff against `main`:
+
 1. **`git diff --name-status main...HEAD`**: Identifies added (`A`), modified (`M`), and deleted (`D`) file paths.
 2. **`git diff --numstat main...HEAD`**: Extracts insertions and deletions per file.
 3. **Visual Representation Mapping**:
@@ -537,7 +552,9 @@ When generating the spatial map for a PR city, the backend computes the diff aga
 ## 10. Review Lifecycle
 
 ### 10.1. Constrained Review Agent Sandbox
+
 When an agent is launched inside a PR city (`pr-<number>`):
+
 1. **Tool Stripping**: Modifying tools (`Write`, `Edit`, `NotebookEdit`) are disabled in the agent configuration, enforcing strict read-only analysis.
 2. **Review System Prompt**: The agent is provided with the base branch name, head commit SHA, list of changed files, and the PR description.
 3. **Verdict Synthesis**: The agent produces structured review commentary and picks a verdict:
@@ -553,6 +570,7 @@ When an agent is launched inside a PR city (`pr-<number>`):
 ### 11.1. Protocol Schema Definitions (Zod)
 
 #### 11.1.1. World & Geometry Models
+
 ```typescript
 import { z } from 'zod';
 
@@ -599,15 +617,18 @@ export const WorldSnapshotSchema = z.object({
   }),
   districts: z.array(DistrictSchema),
   buildings: z.array(BuildingSchema),
-  roads: z.array(z.object({
-    from: z.object({ x: z.number(), y: z.number() }),
-    to: z.object({ x: z.number(), y: z.number() }),
-  })),
+  roads: z.array(
+    z.object({
+      from: z.object({ x: z.number(), y: z.number() }),
+      to: z.object({ x: z.number(), y: z.number() }),
+    }),
+  ),
 });
 export type WorldSnapshot = z.infer<typeof WorldSnapshotSchema>;
 ```
 
 #### 11.1.2. PR Overlay & Diff Schema
+
 ```typescript
 export const FileDiffStatusSchema = z.enum(['added', 'modified', 'deleted', 'renamed']);
 
@@ -632,6 +653,7 @@ export type PullRequestOverlay = z.infer<typeof PullRequestOverlaySchema>;
 ```
 
 #### 11.1.3. Mayor Commands (Client $\rightarrow$ Server)
+
 ```typescript
 export const MayorCommandSchema = z.discriminatedUnion('type', [
   z.object({
@@ -675,6 +697,7 @@ export type MayorCommand = z.infer<typeof MayorCommandSchema>;
 ```
 
 #### 11.1.4. Server Messages (Server $\rightarrow$ Client)
+
 ```typescript
 export const GameEventSchema = z.discriminatedUnion('type', [
   z.object({
@@ -747,13 +770,15 @@ export const ServerMessageSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal('cities.roster'),
-    cities: z.array(z.object({
-      cityId: z.string(),
-      label: z.string(),
-      kind: z.enum(['main', 'pr', 'issue', 'local']),
-      status: z.enum(['idle', 'building', 'ready', 'failed']),
-      prNumber: z.number().optional(),
-    })),
+    cities: z.array(
+      z.object({
+        cityId: z.string(),
+        label: z.string(),
+        kind: z.enum(['main', 'pr', 'issue', 'local']),
+        status: z.enum(['idle', 'building', 'ready', 'failed']),
+        prNumber: z.number().optional(),
+      }),
+    ),
   }),
   z.object({
     type: z.literal('diff.response'),
@@ -770,6 +795,7 @@ export type ServerMessage = z.infer<typeof ServerMessageSchema>;
 ```
 
 ### 11.2. SQLite Database Schema (`.visocity/world.db`)
+
 ```sql
 PRAGMA journal_mode = WAL;
 PRAGMA synchronous = NORMAL;
@@ -811,16 +837,17 @@ CREATE INDEX IF NOT EXISTS idx_events_city_session ON events (city_id, session_i
 
 ### 12.1. HTTP REST Endpoints
 
-| Method | Endpoint | Description | Request Body | Response (200 OK) |
-|---|---|---|---|---|
-| `GET` | `/health` | Server health check probe | None | `{ "status": "ok", "version": "1.0.0" }` |
-| `GET` | `/auth/github/start` | Initiates GitHub OAuth flow | None | Redirects to GitHub authorization URL |
-| `GET` | `/auth/github/callback` | OAuth redirect callback | Query: `?code=...&state=...` | Redirects to frontend with Bearer token |
-| `GET` | `/api/auth/session` | Validate current user token | Headers: `Authorization: Bearer <token>` | `{ "user": { "id": "123", "login": "octocat" } }` |
-| `GET` | `/api/repos` | List accessible repositories | Headers: `Authorization: Bearer <token>` | `{ "repos": [{ "name": "visoagent", "owner": "adithyanotfound" }] }` |
-| `POST` | `/api/repos/import` | Import & clone repository | `{ "repoUrl": "https://github.com/..." }` | `{ "repoKey": "adithyanotfound_visoagent", "status": "ready" }` |
+| Method | Endpoint                | Description                  | Request Body                              | Response (200 OK)                                                    |
+| ------ | ----------------------- | ---------------------------- | ----------------------------------------- | -------------------------------------------------------------------- |
+| `GET`  | `/health`               | Server health check probe    | None                                      | `{ "status": "ok", "version": "1.0.0" }`                             |
+| `GET`  | `/auth/github/start`    | Initiates GitHub OAuth flow  | None                                      | Redirects to GitHub authorization URL                                |
+| `GET`  | `/auth/github/callback` | OAuth redirect callback      | Query: `?code=...&state=...`              | Redirects to frontend with Bearer token                              |
+| `GET`  | `/api/auth/session`     | Validate current user token  | Headers: `Authorization: Bearer <token>`  | `{ "user": { "id": "123", "login": "octocat" } }`                    |
+| `GET`  | `/api/repos`            | List accessible repositories | Headers: `Authorization: Bearer <token>`  | `{ "repos": [{ "name": "visoagent", "owner": "adithyanotfound" }] }` |
+| `POST` | `/api/repos/import`     | Import & clone repository    | `{ "repoUrl": "https://github.com/..." }` | `{ "repoKey": "adithyanotfound_visoagent", "status": "ready" }`      |
 
 ### 12.2. WebSocket Handshake & Streaming (`/ws`)
+
 - **Connection URL**: `ws://127.0.0.1:4100/ws`
 - **Framing**: UTF-8 JSON text frames conforming strictly to `MayorCommand` (client-to-server) and `ServerMessage` (server-to-client).
 - **Heartbeat & Reconnection**:
@@ -858,6 +885,7 @@ CREATE INDEX IF NOT EXISTS idx_events_city_session ON events (city_id, session_i
 ### 13.2. Test Suites Specification
 
 #### 1. Unit Tests (`vitest`)
+
 - **`packages/layout`**:
   - Validates that squarified treemap partition generates zero overlapping rectangles ($[x_1, x_2] \cap [y_1, y_2] = \emptyset$).
   - Validates that building heights monotonically correlate with LOC.
@@ -870,16 +898,19 @@ CREATE INDEX IF NOT EXISTS idx_events_city_session ON events (city_id, session_i
   - Tests path traversal sanitization (e.g. `../../../etc/passwd` $\rightarrow$ rejected).
 
 #### 2. Mock Agent SDK Integration Tests
+
 - A dedicated mock agent harness (`MockAgentEngine`) replaces the Anthropic network calls during automated testing:
   - Simulates streaming token delivery chunk by chunk.
   - Simulates gated tool calls to assert that `permit.requested` correctly halts execution until `permit.resolve` arrives.
   - Verifies that denying a permit passes `{ behavior: 'deny' }` back to the model context.
 
 #### 3. WebSocket Integration Tests
+
 - Boots a transient Fastify server on an ephemeral port.
 - Connects a real WebSocket client to verify the complete handshake: `repo.select` $\rightarrow$ `world.ready` $\rightarrow$ `session.prompt` $\rightarrow$ `tool.started` $\rightarrow$ `session.finished`.
 
 #### 4. Hackathon Demo Verification Checklist (Manual QA)
+
 - [ ] **Bootstrap**: Run `pnpm dev` from clean state; loads demo repository within 2 seconds.
 - [ ] **Canvas**: Smooth pan (drag) and zoom (wheel); clicking building opens Inspector with file stats.
 - [ ] **Drag & Drop**: Dragging building tile populates context input in Mayor Order form.
