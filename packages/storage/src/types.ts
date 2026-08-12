@@ -1,7 +1,19 @@
-import type { GameEvent, WorldSnapshot } from '@visoagent/protocol';
+import type {
+  GameEvent,
+  WorldSnapshot,
+  Task,
+  TaskFilter,
+  TaskTransitionHistoryEntry,
+} from '@visoagent/protocol';
 
 export type SessionStatus =
-  'idle' | 'initializing' | 'running' | 'waiting_for_permit' | 'completed' | 'failed' | 'aborted';
+  | 'idle'
+  | 'initializing'
+  | 'running'
+  | 'waiting_for_permit'
+  | 'completed'
+  | 'failed'
+  | 'aborted';
 
 export interface SessionRecord {
   id: string;
@@ -54,4 +66,23 @@ export interface SnapshotRecord {
 
 export interface StorageOptions {
   dbPath?: string;
+  inMemory?: boolean;
 }
+
+export interface ITaskRepository {
+  create(task: Task): Promise<Task>;
+  findById(id: string): Promise<Task | null>;
+  update(task: Task): Promise<Task>;
+  delete(id: string): Promise<boolean>;
+  list(filter?: TaskFilter): Promise<Task[]>;
+  count(filter?: TaskFilter): Promise<number>;
+  addHistoryEntry(taskId: string, entry: TaskTransitionHistoryEntry): Promise<void>;
+  getHistory(taskId: string): Promise<TaskTransitionHistoryEntry[]>;
+}
+
+export type TaskEventMap = {
+  'task:created': (task: Task) => void;
+  'task:updated': (task: Task) => void;
+  'task:transitioned': (task: Task, transition: TaskTransitionHistoryEntry) => void;
+  'task:deleted': (taskId: string) => void;
+};

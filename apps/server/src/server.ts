@@ -1,12 +1,26 @@
 import Fastify, { FastifyInstance, FastifyServerOptions } from 'fastify';
 import cors from '@fastify/cors';
 import websocket from '@fastify/websocket';
+import path from 'node:path';
+import {
+  TaskService,
+  SqliteTaskRepository,
+  createDatabase,
+} from '@visoagent/storage';
 import { AppConfig, config } from './config.js';
 import { healthRoutes } from './routes/health.js';
+import { tasksRoutes } from './routes/tasks.js';
 import { websocketRoutes } from './ws/handler.js';
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    taskService: TaskService;
+  }
+}
 
 export interface ServerOptions extends FastifyServerOptions {
   appConfig?: AppConfig;
+  taskService?: TaskService;
 }
 
 export async function buildServer(options: ServerOptions = {}): Promise<FastifyInstance> {
@@ -32,8 +46,22 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
     },
   });
 
+  // Initialize or attach TaskService
+  const taskService =
+    options.taskService ??
+    new TaskService(
+      new SqliteTaskRepository(
+        createDatabase({
+          dbPath: path.resolve(currentConfig.repoPath, '.visocity/world.db'),
+        })
+      )
+    );
+
+  server.decorate('taskService', taskService);
+
   // Register Routes
   await server.register(healthRoutes);
+  await server.register(tasksRoutes, { taskService });
   await server.register(websocketRoutes);
 
   return server;
