@@ -1,29 +1,17 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import path from 'node:path';
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { resolve } from "node:path";
+import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      '@visoagent/protocol': path.resolve(__dirname, '../../packages/protocol/src/index.ts'),
+      "@": resolve(import.meta.dirname, "./src"),
     },
   },
   server: {
+    host: "127.0.0.1",
     port: 5173,
-    proxy: {
-      '/health': {
-        target: 'http://127.0.0.1:4100',
-        changeOrigin: true,
-      },
-      '/api': {
-        target: 'http://127.0.0.1:4100',
-        changeOrigin: true,
-      },
-      '/ws': {
-        target: 'ws://127.0.0.1:4100',
-        ws: true,
-      },
-    },
   },
 });

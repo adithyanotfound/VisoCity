@@ -1,13 +1,19 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App.js';
-import './index.css';
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import Root from "./Root";
+import { AudioProvider } from "./components/audio-provider";
+import "./styles.css";
 
-const rootElement = document.getElementById('root');
-if (rootElement) {
-  ReactDOM.createRoot(rootElement).render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>,
-  );
+const root = document.getElementById("root");
+
+if (!root) {
+  throw new Error("Missing #root element");
 }
+
+createRoot(root).render(
+  <StrictMode>
+    <AudioProvider>
+      <Root />
+    </AudioProvider>
+  </StrictMode>,
+);
