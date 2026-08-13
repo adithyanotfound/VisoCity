@@ -4,6 +4,7 @@
 
 ### *Transform Software Repositories into Living, Spatial AI Coding Agent Cities*
 
+[![Built with AO Agent](https://img.shields.io/badge/Built%20with-AO%20Agent-8A2BE2?style=for-the-badge&logo=robot&logoColor=white)](#-acknowledgements)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D%2022.0.0-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![pnpm](https://img.shields.io/badge/pnpm-%3E%3D%2010.0.0-F69220?style=for-the-badge&logo=pnpm&logoColor=white)](https://pnpm.io/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -293,6 +294,12 @@ Contributions are welcome! Please follow these steps:
 
 ---
 
+## 🙏 Acknowledgements
+
+Special thanks to **AO Agent** for assistance in building and architecting this project!
+
+---
+
 ## 📄 License
 
 Distributed under the **MIT License**. See `LICENSE` for details.
@@ -300,5 +307,5 @@ Distributed under the **MIT License**. See `LICENSE` for details.
 ---
 
 <div align="center">
-  <sub>Built with ❤️ by the VisoAgent team. Driven by React 19, Phaser 3, Fastify, and Claude AI.</sub>
+  <sub>Built with ❤️ using <b>AO Agent</b> and the VisoAgent team. Driven by React 19, Phaser 3, Fastify, and Claude AI.</sub>
 </div>
